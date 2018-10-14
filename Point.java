@@ -20,8 +20,13 @@ public class Point {
 	ArrayList<Link> out_link=new ArrayList<Link>();
 	static ArrayList<Point> points=new ArrayList<Point>();
 	int index;
+	// index of point in ArrayList<Point> points
 	static String filePath="C:\\Users\\sdj\\OneDrive\\내 파일\\진행중\\자구설";
-	static File saveFile=new File(filePath+"\\PointData.txt");
+	static File PointData=new File(filePath+"\\PointData.txt");
+	
+	Point() {
+		
+	}
 	
 	Point(String name) {
 		this.name=name;
@@ -51,8 +56,8 @@ public class Point {
 			// parsing할 url 지정(API 키 포함해서)
 			String url = "http://openapi.seoul.go.kr:8088/"+key+"/xml/LinkVerInfo/1/50/"+link_id;
 			
-			DocumentBuilderFactory dbFactoty = DocumentBuilderFactory.newInstance();
-			DocumentBuilder dBuilder = dbFactoty.newDocumentBuilder();
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			Document doc = dBuilder.parse(url);
 			doc.getDocumentElement().normalize();
 			
@@ -71,8 +76,6 @@ public class Point {
 					}
 				}
 			}
-			
-			this.index=points.size()-1;
 		} catch (Exception e) {	
 			e.printStackTrace();
 		}
@@ -80,8 +83,11 @@ public class Point {
 	
 	static void save() {
 		try {
-			FileWriter fw=new FileWriter(saveFile);
+			FileWriter fw=new FileWriter(PointData);
 			BufferedWriter bw=new BufferedWriter(fw);
+			
+			bw.write("name/x/y");
+			bw.newLine();
 			
 			for(int i=0;i<points.size();i++) {
 				bw.write(points.get(i).name);
@@ -97,4 +103,19 @@ public class Point {
 			e.printStackTrace();
 		}
 	}
+	
+	static void print() {
+		for(int i=0;i<points.size();i++) {
+			System.out.println(i+"-"+points.get(i).name);
+		}
+	}
 }
+
+
+
+
+
+
+
+
+
