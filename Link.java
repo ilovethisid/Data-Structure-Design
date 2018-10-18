@@ -11,10 +11,14 @@ public class Link {
 	String id;
 	Point st_node;
 	Point ed_node;
+	// st_node and ed_node of a link
+	
 	int length;
-	double trv_time;
+	int trv_time;
 	static ArrayList<Link> links=new ArrayList<Link>();
-	static String filePath="C:\\Users\\sdj\\OneDrive\\내 파일\\진행중\\자구설";
+	// list of links
+	
+	static String filePath="Enter path of data file";
 	static File LinkData=new File(filePath+"\\LinkData.txt");
 	static File TrafficData=new File(filePath+"\\TrafficData.txt");
 	
@@ -48,6 +52,7 @@ public class Link {
 			NodeList nList = doc.getElementsByTagName("RoadInfo");
 			Node nNode = nList.item(0);
 			Element eElement = (Element) nNode;
+			// setting for parsing
 			
 			nList = doc.getElementsByTagName("row");
 			
@@ -56,6 +61,7 @@ public class Link {
 				if(nNode.getNodeType() == Node.ELEMENT_NODE) {
 					eElement = (Element) nNode;
 					getLink_id(key, getTagValue("axis_cd", eElement));
+					// get link ids for links
 				}
 			}
 		} catch (Exception e) {	
@@ -77,13 +83,16 @@ public class Link {
 			Node nNode = nList.item(0);
 			Element eElement = (Element) nNode;
 			
+			
 			for(int temp = 0; temp < nList.getLength(); temp++) {
 				nNode = nList.item(temp);
 				if(nNode.getNodeType() == Node.ELEMENT_NODE) {
 					eElement = (Element) nNode;
 					
 					links.add(new Link(getTagValue("link_id", eElement)));
+					// add link
 					getLink_info(key, links.get(links.size()-1).id);
+					// get link info
 				}
 			}
 		} catch (Exception e) {	
@@ -105,6 +114,7 @@ public class Link {
 			Node nNode = nList.item(0);
 			Element eElement = (Element) nNode;
 			
+			
 			for(int temp = 0; temp < nList.getLength(); temp++) {
 				nNode = nList.item(temp);
 				if(nNode.getNodeType() == Node.ELEMENT_NODE) {
@@ -117,6 +127,7 @@ public class Link {
 					if(links.get(links.size()-1).name.equals("-")) {
 						links.remove(links.size()-1);
 						break;
+						// exception handling for name "-"
 					}
 					
 					// save point infos for start and end
@@ -126,30 +137,54 @@ public class Link {
 					if(st_node_nm.equals("-")||ed_node_nm.equals("-")) {
 						links.remove(links.size()-1);
 						break;
+						// exception handling for st_node and ed_node both "-"
 					}
 					
 					int searchSt=Point.search(st_node_nm);
 					int searchEd=Point.search(ed_node_nm);
+					// search start and end node
 					
 					if(searchSt<0) {
+						// if start node is not saved yet
+						
 						Point.points.add(new Point(st_node_nm));
 						Point.points.get(Point.points.size()-1).index=Point.points.size()-1;
+						// add point and save index
+						
 						Point.points.get(Point.points.size()-1).out_link.add(links.get(links.size()-1));
+						// save out_link for st_node
+						
 						Point.points.get(Point.points.size()-1).getPointInfo(key, link_id);
+						// get point info
+						
 						links.get(links.size()-1).st_node=Point.points.get(Point.points.size()-1);
+						// save st_node for this link
+						
 					} else {
+						// if start node is already saved
+						
 						Point.points.get(searchSt).out_link.add(links.get(links.size()-1));
+						// save out_link for st_node
+						
 						Point.points.get(searchSt).index=searchSt;
+						// save index of a point
+						
 						Point.points.get(searchSt).getPointInfo(key, link_id);
+						// get point info
+						
 						links.get(links.size()-1).st_node=Point.points.get(searchSt);
+						// save st_node for this link
 					}
 					
 					if(searchEd<0) {
+						// same for ed_node
+						
 						Point.points.add(new Point(ed_node_nm));
 						Point.points.get(Point.points.size()-1).index=Point.points.size()-1;
 						Point.points.get(Point.points.size()-1).in_link.add(links.get(links.size()-1));
 						Point.points.get(Point.points.size()-1).getPointInfo(key, link_id);
 						links.get(links.size()-1).ed_node=Point.points.get(Point.points.size()-1);
+						
 					} else {
 						Point.points.get(searchEd).in_link.add(links.get(links.size()-1));
 						Point.points.get(searchEd).index=searchEd;
@@ -185,13 +220,11 @@ public class Link {
 					eElement = (Element) nNode;
 					
 					sum_spd+=Double.parseDouble(getTagValue("prcs_spd", eElement));
-					links.get(i).trv_time=Double.parseDouble(getTagValue("prcs_trv_time", eElement));
-					MainSystem.print(links.get(i).trv_time);
-				}	// for end
+					links.get(i).trv_time=(int)Double.parseDouble(getTagValue("prcs_trv_time", eElement));
+					// save trv_time
+				}
 			} catch (Exception e) {	
-//					e.printStackTrace();
-				// error
-				links.get(i).trv_time=links.get(i).length/Graph.avg_spd;
+				links.get(i).trv_time=(int)(links.get(i).length/Graph.avg_spd);
 			} // try~catch end
 		}
 			
@@ -199,6 +232,7 @@ public class Link {
 	}
 	
 	static Link getLinkBetween(Point st_node, Point ed_node) {
+		// get link between st_node and ed_node
 		for(int i=0;i<st_node.out_link.size();i++) {
 			if(st_node.out_link.get(i).ed_node==ed_node) {
 				return st_node.out_link.get(i);
@@ -215,6 +249,7 @@ public class Link {
 			
 			bw.write("id/length/name/st_node.index/ed_node/index");
 			bw.newLine();
+			// format of saving links
 			
 			for(int i=0;i<links.size();i++) {
 				bw.write(links.get(i).id);
@@ -228,6 +263,7 @@ public class Link {
 				bw.write(Integer.toString(links.get(i).ed_node.index));
 				bw.newLine();
 			}
+			// save links
 			
 			bw.close();
 		} catch (IOException e) {
@@ -248,10 +284,12 @@ public class Link {
 			
 			bw.write("trv_time");
 			bw.newLine();
+			
 			for(int i=0;i<links.size();i++) {
 				bw.write(Double.toString(links.get(i).trv_time));
 				bw.newLine();
 			}
+			// save trv_time
 			
 			bw.close();
 		} catch (IOException e) {
@@ -259,11 +297,6 @@ public class Link {
 		}
 	}
 }
-
-
-
-
-
 
 
 

@@ -18,10 +18,15 @@ public class Point {
 	double y;
 	ArrayList<Link> in_link=new ArrayList<Link>();
 	ArrayList<Link> out_link=new ArrayList<Link>();
+	// in_links and out_links
+	
 	static ArrayList<Point> points=new ArrayList<Point>();
+	// list of points
+	
 	int index;
 	// index of point in ArrayList<Point> points
-	static String filePath="C:\\Users\\sdj\\OneDrive\\내 파일\\진행중\\자구설";
+	
+	static String filePath="Enter path of data file";
 	static File PointData=new File(filePath+"\\PointData.txt");
 	
 	Point() {
@@ -64,6 +69,7 @@ public class Point {
 			NodeList nList=doc.getElementsByTagName("row");
 			Node nNode = nList.item(0);
 			Element eElement = (Element) nNode;
+			// setting for parsing
 			
 			for(int temp = 0; temp < nList.getLength(); temp++) {
 				nNode = nList.item(temp);
@@ -76,6 +82,7 @@ public class Point {
 					}
 				}
 			}
+			// get point info
 		} catch (Exception e) {	
 			e.printStackTrace();
 		}
@@ -97,16 +104,11 @@ public class Point {
 				bw.write(Double.toString(points.get(i).y));
 				bw.newLine();
 			}
+			// save point info
 			
 			bw.close();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
-	}
-	
-	static void print() {
-		for(int i=0;i<points.size();i++) {
-			System.out.println(i+"-"+points.get(i).name);
 		}
 	}
 }

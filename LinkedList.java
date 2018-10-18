@@ -7,7 +7,7 @@ public class LinkedList {
 	
 	public class Node {
 		Point point;
-		double FScore, GScore, HScore = 0;
+		int FScore, GScore, HScore;
 		Node parentNode;
 		Node next;
 		
@@ -23,47 +23,35 @@ public class LinkedList {
 			this.parentNode=null;
 		}
 		
-		double getFScore(Point endP) {
+		int getFScore(Point endP) {
 			this.FScore=this.getGScore()+this.getHScore(endP);
 			
 			return this.FScore;
 		}
 		
-		double getGScore() {
+		int getGScore() {
 			Node cur;
-			double GScore=0;
 			
 			cur=this;
 			
-			try {
-				while(cur.parentNode!=null) {
-					Link linkBetween=Link.getLinkBetween(cur.parentNode.point, cur.point);
-					GScore+=linkBetween.trv_time;
-					
-					cur=cur.parentNode;
-				}
-			} catch(NullPointerException e) {
-				
-			}
-			
-			this.GScore=GScore;
+			this.GScore=this.parentNode.GScore+Link.getLinkBetween(cur.parentNode.point, cur.point).trv_time;
+			// GScore is sum of all GScores of parent nodes,
+			// so this.GScore = parent.GScore + GScore(this, parent)
 			
 			return this.GScore;
 		}
 		
-		double getHScore(Point endP) {
-			for(int i=0;i<this.point.out_link.size();i++) {
-				if(this.point.out_link.get(i).ed_node==endP) {
-					Link linkBetween=Link.getLinkBetween(this.parentNode.point, this.point);
-					return linkBetween.trv_time;
-				}
-			}
+		int getHScore(Point endP) {
+			// get HScore
+			// (estimated score left)
 			
 			double distance;
 			
 			distance=Math.sqrt(Math.pow(this.point.x-endP.x, 2) + Math.pow(this.point.y-endP.y, 2));
+			// distance calculated by vertexs' coordinates
 			
-			this.HScore=distance/Graph.avg_spd;
+			this.HScore=(int)(distance/Graph.avg_spd);
+			// HScore=distance/spd (=time)
 			
 			return this.HScore;
 		}
@@ -93,7 +81,7 @@ public class LinkedList {
 		cur=this.head;
 		
 		try {
-			while(cur.next!=node||cur==null) {
+			while(cur.next!=node&&cur!=null) {
 				cur=cur.next;
 			}
 		} catch(NullPointerException e) {
@@ -143,20 +131,35 @@ public class LinkedList {
 	
 	void print() {
 		Node cur;
+		int seconds;
+		int minutes;
 		
 		cur=this.head;
 		
 		try {
-			while(cur!=null) {
+			while(cur.next!=null) {
 				if(cur.parentNode!=null) {
 					System.out.println("->"+Link.getLinkBetween(cur.parentNode.point, cur.point).name+"->");
+					// print links
 				}
 				System.out.println(cur.point.name);
+				// print points
 				
 				cur=cur.next;
 			}
 			
-			System.out.println("////////////////////");
+			System.out.println("->"+Link.getLinkBetween(cur.parentNode.point, cur.point).name+"->");
+			System.out.println(cur.point.name);
+			// print destination link and point
+			
+			seconds=(int)(cur.FScore%60);
+			minutes=(int)(cur.FScore/60);
+			// calculate estimated trv_time
+			
+			System.out.println("This route takes "+minutes+" minutes and "+seconds+" seconds");
+			// print estimated trv_time
+			
+			System.out.println("");
 		} catch(NullPointerException e) {
 			
 		}

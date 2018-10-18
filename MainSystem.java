@@ -9,60 +9,88 @@ import java.util.Scanner;
 public class MainSystem {
 	
 	static String key="474d5a6356696c6f36386a59757667";
+	// key for road APIs
 	
 	public static void main(String[] args) {
+		// main
 		
-		// System setup
+		System.out.println("NaviNavi");
 		
-		print("NaviNavi");
+		// get data from text file
 		readPointData();
 		readLinkData();
 		readTrafficData();
 		
-//		updateRoadData(key);
-//		Link.save();
-//		Point.save();
+		System.out.println("Do you wish to update road data?(It takes a lot of time)");
+		System.out.println("Yes: 1, No: 0");
 		
-//		Link.updateTrafficInfo(key);
-//		Link.saveTrafficData();
+		Scanner scanner=new Scanner(System.in);
 		
-		test();
+		int answer=scanner.nextInt();
 		
-		Point.print();
+		if(answer==1)
+			updateRoadData();
+		// in case of updating data
+		
+		System.out.println("Do you want to view sample?");
+		System.out.println("Yes: 1, No: 0");
+		
+		answer=scanner.nextInt();
+		
+		if(answer==1)
+			test();
+		// in case of viewing sample
 		
 		// navigation start
 		navigation_start();
+		
+		scanner.close();
+		
 	} // main end
 	
+	
+	
 	private static void navigation_start() {
+		
+		Scanner scanner=new Scanner(System.in);
+		
 		while(true) {
 			Graph graph=new Graph();
+			int startIndex, endIndex;
 			
-			Scanner scanner=new Scanner(System.in);
+			System.out.println("Do you wish to update traffic data?(It takes a lot of time)");
+			System.out.println("Yes: 1, No: 0");
 			
-			print("Enter start node's index: ");
-			int start=scanner.nextInt();
-			print("Enter end node's index: ");
-			int end=scanner.nextInt();
+			int answer=scanner.nextInt();
+			
+			if(answer==1)
+				updateTrafficData();
+			
+			System.out.println("Enter start node's index: ");
+			startIndex=scanner.nextInt();
+			System.out.println("Enter end node's index: ");
+			endIndex=scanner.nextInt();
 			
 			long startTime=System.currentTimeMillis();
 			
-			LinkedList temp=graph.getPath(Point.points.get(start), Point.points.get(end));
+			LinkedList temp=graph.getPath(Point.points.get(startIndex), Point.points.get(endIndex));
 			
 			if(temp!=null) {
 				temp.print();
 				// display path
 			}
 			else {
-				print("Cannot find a path");
+				System.out.println("Cannot find a path");
+				// if there is no path
 			}
-			print("---------------------------");
+			System.out.println("---------------------------");
 			
 			long endTime=System.currentTimeMillis();
 			
 			int elapsed_time=(int)(endTime-startTime)/1000;
 			
-			print("Time: "+elapsed_time+"s");
+			System.out.println("Elapsed Time: "+elapsed_time+"s");
+			// print out elapsed time
 		}
 	}
 	
@@ -70,31 +98,62 @@ public class MainSystem {
 		long startTime=System.currentTimeMillis();
 		
 		Graph sample=new Graph();
+		int temp;
 		
-		for(int i=50;i<100;i++) {
-			LinkedList temp=sample.getPath(Point.points.get(0), Point.points.get(i));
+		Point start=Point.points.get(30);
+		Point end=Point.points.get(60);
+		// point[30] => point[60]
+		// sample route(can test other routes as well)
 		
-			if(temp!=null) {
-				temp.print();
-			}
-			else {
-				print("Cannot find a path");
-			}
-			print("---------------------------");
-		}
+		System.out.println("Start at: "+start.name);
+		System.out.println("Destination: "+end.name);
+		// print start location and destination
+		
+		
+		sample.getPath(start, end).print();
+		// get path
+		
+		
+		System.out.println("Now we change trv_time to test if the path changes.");	
+		
+		Link sampleLink=Link.getLinkBetween(Point.points.get(27), Point.points.get(212));
+		temp=sampleLink.trv_time;
+		sampleLink.trv_time=3000;
+		// increase trv_time of one of the link in the path
+		// can choose which link to increase trv_time
+		
+		System.out.println("Start at: "+start.name);
+		System.out.println("Destination: "+end.name);
+		
+		sample.getPath(Point.points.get(30), Point.points.get(60)).print();
+		
+		sampleLink.trv_time=temp;
 		
 		long endTime=System.currentTimeMillis();
 		
 		int elapsed_time=(int)(endTime-startTime)/1000;
 		
-		print("Time: "+elapsed_time+"s");
-		print("test complete!");
-		print("///////////////////////////////////////////");
+		System.out.println("Elapsed Time: "+elapsed_time+"s");
+		System.out.println("Test complete!");
+		System.out.println("");
 	}
+	
+	
+	private static void updateRoadData() {
+		updateRoadData(key);
+		Link.saveLinkData();
+		Point.save();
+	}
+	
+	private static void updateTrafficData() {
+		Link.updateTrafficInfo(key);
+		Link.saveTrafficData();
+	}
+	
 
 	private static void updateRoadData(String key) {
 		Link.links.clear();
-		Link.getRoad_axis_cd(key, "02");
+		Link.getRoad_axis_cd(key, "03");
 		// other functions are called continuously
 	}
 	
@@ -120,6 +179,7 @@ public class MainSystem {
 				
 				i++;
 			}
+			// read point data
 			
 			br.close();
 		} catch (FileNotFoundException e) {
@@ -147,10 +207,14 @@ public class MainSystem {
 				Link.links.get(i).id=s;
 				Link.links.get(i).length=Integer.parseInt(br.readLine());
 				Link.links.get(i).name=br.readLine();
+				// save link id, length, name
+				
 				Link.links.get(i).st_node=Point.points.get(Integer.parseInt(br.readLine()));
 				Link.links.get(i).st_node.out_link.add(Link.links.get(i));
 				Link.links.get(i).ed_node=Point.points.get(Integer.parseInt(br.readLine()));
 				Link.links.get(i).ed_node.in_link.add(Link.links.get(i));
+				// save st_node and ed_node
+				// and in_links and out_links as well
 				
 				i++;
 			}
@@ -174,18 +238,19 @@ public class MainSystem {
 			
 			br.readLine();
 			// description about avg_spd
-			br.readLine();
+			Graph.avg_spd=Double.parseDouble(br.readLine());
 			// avg_spd
 			br.readLine();
 			// description about traffic data
 			
-			while((s=br.readLine()) != null) {
-				Link.links.add(new Link());
-				
-				Link.links.get(i).trv_time=Double.parseDouble(br.readLine());
+			while(true) {
+				if((s=br.readLine())==null)
+						break;
+				Link.links.get(i).trv_time=(int)Double.parseDouble(s);
 				
 				i++;
 			}
+			// read link trv_time
 			
 			br.close();
 		} catch (FileNotFoundException e) {
@@ -193,21 +258,5 @@ public class MainSystem {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	static void print(String str) {
-		System.out.println(str);
-	}
-	
-	static void print(int n) {
-		System.out.println(n);
-	}
-	
-	static void print(double x) {
-		System.out.println(x);
-	}
-	
-	static void print(long x) {
-		System.out.println(x);
 	}
 }	// class end
